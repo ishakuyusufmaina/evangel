@@ -274,14 +274,14 @@ let sectionDoc = await getDoc(sectionRef);
 
  }*/
   
-  
+  let sections = sectionDoc.data(); 
  onAuthStateChanged(auth, async user=>{ 
        if (!user) return;
        let id = user.email.replace(/@.*/, "");
       let teachers = (await getDoc(doc(db, schoolId, "teachers"))).data()
        let teacher = teachers[id];
        if (sectionDoc.exists()){
-           let sections = sectionDoc.data();
+           
            if (teacher.role??{}.fm){
              teacher.adminFunctions.students.resources = Array.from(new Set(teacher.adminFunctions.students.resources.concat(teacher.role.fm)));
            }
@@ -454,13 +454,21 @@ let sectionDoc = await getDoc(sectionRef);
   }
 add.onclick = e=>{
   let cls = classSelect.value;
-  console.log(cls);
+  let section;
+  for (const sect in sections){
+    
+    if (sections[sect].classes.includes(cls)) {
+      section = sect;
+   
+    }
+  }
+  console.log(section);
   let result ={
     sn: table.children.length,
     name: "",
     gender: "",
-    religion: ""
-    
+    religion: "",
+    section    
   }
   addRow(result);
     let lastN = Number(result.sn);
@@ -634,6 +642,7 @@ add.onclick = e=>{
                 for (const i in student){
                   if (!upStd[i]) upStd[i]=student[i];
                 }
+              console.log(upStd.section);
                 await transaction.set(doc(db, schoolId, "db", "students", upStd.id.replaceAll("/", "_")), upStd);
                 await transaction.set(stdsRef, stds);
                 await transaction.set(doc(db, schoolId, key(session.year+terms[session.term])), {lastStudentId: lastId}, {merge:true});
