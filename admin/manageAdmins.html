@@ -195,7 +195,7 @@
       const auth = getAuth(app);
     const db = getFirestore(app);
   
- 
+ //const schoolId = "fac";
   let teacherDoc = await getDoc(doc(db, schoolId, "teachers"));
   let teachers = teacherDoc.exists()? teacherDoc.data() : {};
   let sectionDoc = await getDoc(doc(db, schoolId, "section"));
@@ -294,6 +294,10 @@
     scoresheetConfig: {
       action: "Configure Scoresheet",
       resources: sects
+    },
+    scoresheetView: {
+      action: "View Scoresheet",
+      resources: classes
     },
     rcConfig: {
       action: "Configure Report Card",
