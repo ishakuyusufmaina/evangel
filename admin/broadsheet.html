@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="broadsheet.css">
+   <script src="../config.js"></script>
+  <script src="../batch2.js"></script>
+  
+  <!-- Include this in the <head> of your HTML -->
+  <script src="rc/rc.js"></script>
+  <title>Broadsheet</title>
+  
+  <style>
+  tr, th, td {
+    border: 1px solid black;
+  }
+  </style>
+</head>
+<body>
+  <h1 class="no-print">Broadsheet</h1>
+  <div class="select-container no-print">
+   <select id="sessionSelect">
+    <option> -select session- </option>
+  </select>
+  <select id="classSelect">
+    <option value=""> [select class] </option>    
+  </select>
+  </div>
+  <div id="brContainer"> 
+    <table id="broadsheet">
+      <thead></thead>
+      <tbody id="bsbody"></tbody>
+    </table>
+  </div>  
+  
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+import {getFirestore, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+import {getAuth} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const terms = ["first term", "second term", "third term"];
+
+var section;
+let termIndex = 0;
+
+/* ---------------------- INITIAL DATA ---------------------- */
+
+let sectionRef = doc(db, schoolId, "section");
+const sectionDoc = await getDoc(sectionRef);
+for (const sectId in sectionDoc.data()){
+  const section = sectionDoc.data()[sectId];
+  section.classes.forEach(cls=>{
+    let opt = new Option(cls);
+    opt.dataset.section = sectId;
+    classSelect.append(opt);
+  })
+} 
+
+let sessionsRef = doc(db, schoolId, "sessions");
+let sessionsDoc = await getDoc(sessionsRef);
+
+if (sessionsDoc.exists()){
+  let sessions = sessionsDoc.data().sessions;
+  sessions = sessions.sort((a,b)=>b.no-a.no);
+
+  sessions.forEach((session,i)=>{
+    let opt = document.createElement("option");
+
+    opt.innerHTML = session.year + ", " + terms[session.term];
+    opt.dataset.year = session.year;
+    opt.dataset.term = session.term;
+
+    sessionSelect.appendChild(opt);
+
+    if(i==0){
+      opt.selected = true;
+      termIndex = session.term;
+    }
+  });
+}
+
+/* ---------------------- MAIN FUNCTION ---------------------- */
+
+async function loadBroadsheet(){
+
+  broadsheet.querySelector("thead").innerHTML = "";
+  broadsheet.querySelector("tbody").innerHTML = "";
+  let sectId = classSelect.selectedOptions[0].dataset.section;
+ section = sectionDoc.data()[sectId];
+  const cls = classSelect.value;
+  if (!cls) return;
+  termIndex = sessionSelect.selectedOptions[0].dataset.term;
+
+  let stdsRef = doc(
+    db,
+    schoolId,
+    key(sessionSelect.value),
+    key(cls),
+    "students"
+  );
+
+  let stdsDoc = await getDoc(stdsRef);
+
+  if(!stdsDoc.exists()) return;
+
+  let students = Object.values(stdsDoc.data());
+
+  const subjects = section.subjects.sort();
+  const scoreSheetConfig = section.scoreSheetConfig;
+
+  const asms = scoreSheetConfig.assessments;
+  const exam = Number(scoreSheetConfig.exam);
+
+  const headings = subjects.map(subj=>{
+    const heading = {name: subj};
+    heading.subtotals = asms;
+
+    heading.total =
+      exam +
+      heading.subtotals
+      .map(s=>s.subtotal)
+      .reduce((a,b)=>Number(a)+Number(b));
+
+    return heading;
+  });
+
+  renderBSHeadings(headings, exam);
+  renderStudents(students, headings);
+}
+
+/* ---------------------- EVENT LISTENERS ---------------------- */
+
+sessionSelect.addEventListener("change", loadBroadsheet);
+classSelect.addEventListener("change", loadBroadsheet);
+
+/* first load */
+loadBroadsheet();
+
+/* ---------------------- FUNCTIONS ---------------------- */
+
+function renderStudents(students, headings){
+const bsbody = broadsheet.querySelector("tbody");
+  students.sort((a,b)=>a.name.localeCompare(b.name));
+
+  students.forEach(student=>{
+    const row = bsbody.insertRow();
+
+    const nameCell = row.insertCell();
+    nameCell.innerHTML = student.name.toUpperCase();
+
+    headings.forEach(h=>{
+
+      const subjK = h.name.replaceAll(" ","").trim();
+      const subject = student.subjects[subjK];
+      if(!subject) return;
+      const termSubject = subject[termIndex];
+      let total = Number(termSubject.exam.replace("-", 0))
+      h.subtotals.forEach(subtotal=>{
+
+        let scoreCell = row.insertCell();
+        
+
+        scoreCell.innerHTML =
+          termSubject[subtotal.name.toLowerCase()];
+
+        total += Number(scoreCell.textContent.replace("-",0));
+      });
+      let scoreCell = row.insertCell();
+      scoreCell.innerHTML = termSubject.exam;
+      scoreCell = row.insertCell();
+      scoreCell.innerHTML = total;
+
+    });
+
+  });
+
+}
+
+function renderBSHeadings(headings, exam){
+
+  let theadings = broadsheet.querySelector("thead");
+
+  theadings.innerHTML = `
+  <tr><th rowspan="2" class="header-subject"><span>Subject</span></th></tr>
+  <tr></tr>
+  <tr><th class="header-student">Student</th></tr>
+  `;
+
+  const subjHeadRow = theadings.children[0];
+  const subtotalRow = theadings.children[1];
+
+  headings.forEach(h=>{
+
+    const subjHead = document.createElement("th");
+    subjHead.innerHTML = h.name;
+    subjHead.classList.add("subject");
+    subjHead.setAttribute("colspan", h.subtotals.length + 2);
+
+    
+    
+    h.subtotals.forEach(subtotal=>{
+
+      const subtHead = document.createElement("th");
+      subtHead.innerHTML = subtotal.subtotal;
+      subtHead.setAttribute("rowspan",2);
+
+      subtotalRow.append(subtHead);
+
+    });
+   subjHeadRow.append(subjHead);
+     const examHead = document.createElement("th");
+    examHead.innerHTML = exam;
+    examHead.setAttribute("rowspan",2);
+    subtotalRow.append(examHead);
+    
+    const totalHead = document.createElement("th");
+    totalHead.innerHTML = h.total;
+    totalHead.setAttribute("rowspan",2);
+    subtotalRow.append(totalHead);
+
+  });
+
+}
+
+function key(token){
+  return token.replaceAll(" ","")
+              .replaceAll("/","")
+              .replaceAll(",","");
+}
+</script>
+</body>
+</html>
