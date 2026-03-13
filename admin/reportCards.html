@@ -166,8 +166,8 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
     scoreSheetConfig = sections[sectK].scoreSheetConfig;
     let assessments = scoreSheetConfig.assessments??[{name: "CA", subtotal: 30}];
     averageInterps = sections[sectK].averageInterpretations??{};
-    console.log(averageInterps);
-    console.log(JSON.stringify(assessments));
+   // console.log(averageInterps);
+   // console.log(JSON.stringify(assessments));
     sectSubjs = sections[sectK].subjects;
     predefinedAsms = [];
     useDerivedAsm = sections[sectK].useDerivedAsm;
@@ -279,13 +279,14 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       else std.pic = "std.jpg";
       let cls = classSelect.value.toLowerCase()[0];      
       let reportCard = document.createElement("table");
+      
       reportCard.innerHTML = `
       <caption>
       <header>
      
       <h2>${schoolName.toUpperCase()}</h2>
       <address>
-      -School Address-
+      <h3>P.O BOX 900, MAIDUGURI BORNO STATE, NIGERIA</h3>
       </address>
       </header>
       <div id="logo-container">
@@ -301,12 +302,12 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
           <table class="student-info-table">
             <tr>
       <td colspan="2" class="std-pic-container">
-            <img class="logo" src="${optimizeCloudinaryUrl(std.picURL)}">
+            <img class="logo" alt="">
       </td>
       </tr>
       <tr class="std-name">          
         <td>NAME: ${std.name.toUpperCase()}</td>
-        <td>GENDER: ${std.gender}</td>
+        <td>GENDER: ${(std.gender || "").toUpperCase()}</td>
       </tr>
       <tr>
       <td>TERM: ${sessionSelect.value.split(",")[1]}</td>
@@ -318,7 +319,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       </tr>
       <tr>
       <td>NO: IN CLASS: ${students.length}</td>      
-      <td>POSITION: ${g}</td>
+      <td>POSITION: ${toSuperscriptOrdinal(std.position)}</td>
       </tr>
       </table> 
       </caption>
@@ -331,9 +332,18 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       <th>REMARK</th>
       </tr>
       `;
-     
+     const stdImg = reportCard.querySelector(".std-pic-container img");
+     console.log(std.picURL);
+      if (std.picURL) optimizeImage(optimizeCloudinaryUrl(std.picURL))
+      .then(file=>{
+        stdImg.src = URL.createObjectURL(file);
+        console.log("picture loaded.................");
+      })
+      .catch (e=>{
+        console.error(e.message);
+      })
       let subjects = std.subjects??{};
-      console.log(JSON.stringify(subjects));
+     // console.log(JSON.stringify(subjects));
       let subjKeys = Object.keys(subjects).sort();
       let stdReg = std.religion;
       if (!stdReg) {
@@ -369,7 +379,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
         let exam = Number(termScores.exam.replace("-", "0"))
         total += exam; // Number(termScores.exam.replace("-", "0"))
         
-        console.log(total);
+       // console.log(total);
         let t1= Number(subjects[subj][termIndex].test1 ?? 0);
         let t2 = Number(subjects[subj][termIndex].test2 ?? 0);
         let t3 = Number(subjects[subj][termIndex].test3 ?? 0);
@@ -403,7 +413,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       let psychoElm = document.createElement("table");
       let txt = "";
       let domains = sections[std.section].psychometrics;
-      console.log(domains, std.section);
+      //console.log(domains, std.section);
       
      /* domains.forEach(d=>{
         let r = psychoElm.insertRow();
@@ -590,6 +600,73 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
   function optimizeCloudinaryUrl(url, params = "f_auto,q_auto") {
     if (!url || !url.length) return "../../std-pic.jpg";
     return url.replace("/upload/", `/upload/${params}/`);
+}
+  
+  
+  
+  const MAX_WIDTH = 1024;
+const MAX_HEIGHT = 1024;
+const QUALITY = 0.7; // 0.1 - 1.0
+async  function optimizeImage(url) {
+   const file  = await urlToFile(url);
+  console.log(88)
+  return new Promise((resolve) => {
+
+    const img = new Image();
+    const reader = new FileReader();
+
+    reader.onload = e => img.src = e.target.result;
+
+    img.onload = () => {
+
+      let { width, height } = img;
+
+      // Maintain aspect ratio
+      if (width > MAX_WIDTH || height > MAX_HEIGHT) {
+        const ratio = Math.min(
+          MAX_WIDTH / width,
+          MAX_HEIGHT / height
+        );
+
+        width *= ratio;
+        height *= ratio;
+      }
+
+      // Canvas
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Convert to Blob (Compressed)
+      canvas.toBlob(
+        blob => resolve(blob),
+        "image/jpeg",
+        QUALITY
+      );
+    };
+
+   reader.readAsDataURL(file);
+    //console.log(999);
+   // const u=URL.createObjectURL(file);
+   // console.log(u);
+    //return u; // URL.createObjectURL(file);
+  });
+}
+  
+  async function urlToFile(url, filename = "image.png") {
+  // Fetch the image from the URL
+  const response = await fetch(url, { mode: "cors" });
+  if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`);
+
+  // Convert response to Blob
+  const blob = await response.blob();
+
+  // Create a File from the Blob
+  const file = new File([blob], filename, { type: blob.type });
+  return file;
 }
   </script>
   
