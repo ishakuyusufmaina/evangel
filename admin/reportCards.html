@@ -448,14 +448,13 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       COMMENT: <strong class="comment">${comnt}</strong>
       
       
-      
+      <img class="stamp" src="principal-asset/stamp.png">
+
       `;
       wrapper.append(p);
       let stampContainer = document.createElement("div");
      stampContainer.innerHTML = `
-      <img class="stamp hide" src="principal-asset/stamp.png">
-      <img class="stamp" src="principal-asset/stamp.png">
-
+    
       `;
       stampContainer.classList.add("stamp-container");
       wrapper.append(stampContainer);
@@ -1220,10 +1219,11 @@ header h3{
 }
 
 .comment{
+  display: inline-block;
   font-weight:bold;
   color:#1e4f8a;
-  z-index: 1000;
-  margin-bottom:0;
+  z-index: 100;
+//  margin-bottom:0;
 }
 
   .stamp-container {
@@ -1236,9 +1236,11 @@ header h3{
 
   .stamp {
   width:280px;
- right:20px;
+ right:0px;
+    z-index: 50;
     position: absolute;
-    top: calc(-50% - 20px);
+    top: -50%;
+  //  top: calc(-50% - 20px);
     background: none;
 //  margin-top:-20px;
 }
