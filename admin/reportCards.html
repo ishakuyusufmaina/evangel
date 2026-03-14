@@ -452,8 +452,10 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       `;
       wrapper.append(p);
       let stampContainer = document.createElement("div");
-     stampContainer.innerHTML = `<img class="stamp" src="principal-asset/stamp.png">
-   
+     stampContainer.innerHTML = `
+      <img class="stamp hide" src="principal-asset/stamp.png">
+      <img class="stamp" src="principal-asset/stamp.png">
+
       `;
       stampContainer.classList.add("stamp-container");
       wrapper.append(stampContainer);
@@ -1220,27 +1222,40 @@ header h3{
 .comment{
   font-weight:bold;
   color:#1e4f8a;
-  z-index: 100;
+  z-index: 1000;
+  margin-bottom:0;
 }
 
   .stamp-container {
-    display: inline-block;
-    //position: absolute;
-    bottom: 0;
-    left: 0;
+    //border: 1px solid black;
+    margin-top: 20px;
+    position: relative;
+    padding: 0;
+    
   }
-.stamp{
+
+  .stamp {
   width:280px;
-  
-  //right:0px;
+ right:20px;
+    position: absolute;
+    top: calc(-50% - 20px);
+    background: none;
 //  margin-top:-20px;
 }
+  .stamp.hide {
+    position: static;
+  visibility: hidden;
+    height: 50%;
+  
+}
+  
+
 
 .sign{
   width:120px;
  // position:relative;
  // right: 40px;
- / bottom: 40px;
+ // bottom: 40px;
  // margin-top:-30px;
 // bottom: 0px;
   
@@ -1282,7 +1297,7 @@ button{
 @media print{
 
 body{
-  background:white;
+  //background:white;
 }
 
 .no-print{
@@ -1291,7 +1306,7 @@ body{
 
 .wrapper{
   margin:0;
-  border:none;
+ // border:none;
   box-shadow:none;
   page-break-after:always;
 }
