@@ -419,6 +419,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       //console.log(domains, std.section);
     let shrow= psychoElm.insertRow();  
       let sdrow= psychoElm.insertRow();  
+      domains ??=[];
      domains.forEach((d, i)=>{
        // let r = psychoElm.insertRow();
         let dC = document.createElement("th");
@@ -432,7 +433,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       });
       let psychoCont = document.createElement("div");
       psychoCont.className = "psychomotor";
-      psychoCont.innerHTML = `
+      if (domains.length) q0psychoCont.innerHTML = `
       <h3>Behaviour and Activities</h3>
       `;
       psychoCont.append(psychoElm);
