@@ -293,16 +293,23 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       </header>
       <div id="logo-container">
         <div class="top-hl"></div>
+         
         <div class="bottom-hl"></div>
-        <img class="logo" src="../logo.png">
-        <img class="logo std" alt="">
+       
       </div>
-      <h3>TERMINAL REPORT</h3>
+      <h3><img class="logo std" alt="">TERMINAL REPORT<img class="logo" src="../logo.png"></h3>
           <table class="student-info-table">
   
-      <tr class="std-name">          
-        <td>NAME: ${std.name.toUpperCase()}</td>
-        <td>GENDER: ${(std.gender || "").toUpperCase()}</td>
+      <tr class="std-name">     
+               
+       <td>
+ 
+        NAME: ${std.name.toUpperCase()}
+      </td>
+        <td>
+        
+      GENDER: ${(std.gender || "").toUpperCase()}
+      </td>
       </tr>
       <tr>
       <td>TERM: ${sessionSelect.value.split(",")[1]}</td>
@@ -310,7 +317,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       </tr>
       <tr>    
       <td>SESSION: ${sessionSelect.value.split(",")[0]}</td>
-      <td>RESUMPTION: <strong><time>-<sup>th</sup> -, 2026</time></strong></td>
+      <td>RESUMPTION: <strong><time>27<sup>th</sup> APRIL, 2026</time></strong></td>
       </tr>
       <tr>
       <td>NO: IN CLASS: ${students.length}</td>      
@@ -1048,8 +1055,8 @@ body{
   
     .top-hl, .bottom-hl {
     border: 2px solid #003366;;
-    position: absolute;
-    width: calc(100%);
+   // position: absolute;
+    width: 100%;
     left: 0;
     bottom: 40px;
     z-index: 1;
@@ -1062,10 +1069,11 @@ body{
 
   
   .bottom-hl { 
-    position: absolute;
-    width: calc(100%);
+   // position: absolute;
+    width: 100%;
     left: 0;
     bottom: 20px;
+    margin-top: 20px;
   }
 
 /* PAGE WRAPPER */
@@ -1109,7 +1117,7 @@ header h3{
 /* LOGO AREA */
 
 #logo-container{
-  display:flex;
+ // display:flex;
   justify-content:center;
   align-items:center;
   gap:20px;
@@ -1118,16 +1126,18 @@ header h3{
 }
 
 .logo{
-  width:70px;
-  height:70px;
+  width:100px;
+  height:100px;
   object-fit:contain;
   z-index: 100;
+  float: right;
 }
 
 .logo.std{
   border-radius:50%;
   border:2px solid #ddd;
   background: white;
+  float: left;
 }
 
 /* STUDENT INFO TABLE */
