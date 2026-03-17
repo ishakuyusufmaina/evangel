@@ -474,7 +474,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       `;
       wrapper.append(p);
       p.classList.add("powered");
-      container.append(hr, wrapper);
+      container.append(wrapper, hr);
     });
     
     function remark(test, exam){
