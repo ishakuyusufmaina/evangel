@@ -282,6 +282,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       let reportCardBody = document.createElement("div");
       let reportCardFooter = document.createElement("table");
       reportCardHeader.className = "report-card-header";
+      cls = classSelect.value;
       reportCardHeader.innerHTML = `
       <caption>
       <header>
@@ -313,7 +314,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       </tr>
       <tr>
       <td>TERM: ${sessionSelect.value.split(",")[1]}</td>
-      <td>CLASS: ${classSelect.value}</td>
+      <td>CLASS: ${cls}</td>
       </tr>
       <tr>    
       <td>SESSION: ${sessionSelect.value.split(",")[0]}</td>
@@ -446,7 +447,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       psychoCont.append(psychoElm);
     reportCardBody.append(psychoCont);
       wrapper.append(reportCardHeader, reportCardBody);
-      
+      let c = cls.toLowerCase()[0];
       let p = document.createElement("p");
       p.innerHTML = `
       TOTAL SCORE: ${std.score}<br>
@@ -456,7 +457,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       COMMENT: <strong class="comment">${comnt}</strong>
       
       
-      <img class="stamp" src="principal-asset/stamp.png">
+      <img class="stamp" src='${(c=="s" || c=="j")? "principal-asset/stamp.png" : "hm-asset/stamp.png"}'>
 
       `;
       wrapper.append(p);
@@ -1047,6 +1048,11 @@ table tr:nth-child(odd) {
   padding:0;
 }
 
+  img[src="hm-asset/stamp.png"]{
+   //transform: scale(0.85);
+    transform: translateY(-100px);
+    clip-path: circle(50%);
+  }
 body{
   font-family: "Patrick Hand", system-ui, sans-serif;
   background:#f3f3f3;
