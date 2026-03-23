@@ -371,6 +371,10 @@ let teachersRef = doc(db, schoolId, "teachers");
           loads = teacher.load;
         } // end of else
       
+           for (const s in teacher.load){
+       loads[s] ??=[];
+       loads[s].push(teacher.load[s]);
+           }
     
          let loadCont = document.querySelector(".load-container");
         for (const subj in loads){
