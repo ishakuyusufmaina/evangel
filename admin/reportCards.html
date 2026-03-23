@@ -244,10 +244,14 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
           delete subjects[subj];
          // console.log(subj, "deleted out");
           
-        }          
+        }   
+                
         if (srp[sN]) {
           //if the srp of the subj is not as of the faith of the student, delete the subject among the student's subjects
           if (!(srp[sN]==faith))
+          delete subjects[subj];
+        }
+        if (subjects[subj][termIndex].inactive){
           delete subjects[subj];
         }
         try {
