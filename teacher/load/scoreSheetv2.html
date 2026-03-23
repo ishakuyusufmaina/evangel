@@ -274,7 +274,14 @@ await  render();
         student.subjects[subjK][termIndex]??={}
         let scores = student.subjects[subjK][termIndex];
         statusInp.checked = !student.subjects[subjK][termIndex].inactive;
-
+        let inInput = document.createElement("input");
+        inInput.type = "checkbox";
+        inInput.checked = statusInp.checked;
+        name.append(" ", inInput);
+        inInput.onchange = e=>{
+          student.subjects[subjK][termIndex].inactive = !e.target.checked;
+          console.log(e.target.checked);
+        }
         let sum = 0;
         scores.exam??="-";
         scores.exam = String(scores.exam);
