@@ -427,6 +427,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       //wrapper.innerHTML = '<img class="stamp" src="../../stamp.jpg">'
       let psychoElm = document.createElement("table");
       let txt = "";
+      sections[std.section]??={};
       let domains = sections[std.section].psychometrics;
       //console.log(domains, std.section);
     let shrow= psychoElm.insertRow();  
